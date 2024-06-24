@@ -1,21 +1,34 @@
-import React, { useState } from "react";
-import { Box, Button, Container, Flex, Heading, Input, Select, Text, VStack, Image, useToast } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Button, Container, Flex, Heading, Input, Text, VStack, Image, useToast, Spinner, SimpleGrid } from "@chakra-ui/react";
 import { FaPlane, FaCalendarAlt, FaSearch } from "react-icons/fa";
 
 const Index = () => {
   const [destination, setDestination] = useState("");
   const [departureDate, setDepartureDate] = useState("");
+  const [flights, setFlights] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
 
   const handleSearch = () => {
     if (destination && departureDate) {
-      toast({
-        title: "Search initiated",
-        description: `Searching flights to ${destination} on ${departureDate}`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
+      setIsLoading(true);
+      // Simulating API call
+      setTimeout(() => {
+        const mockFlights = [
+          { id: 1, airline: "AirEase", departure: "10:00 AM", arrival: "12:00 PM", price: "$299" },
+          { id: 2, airline: "SkyHigh", departure: "2:00 PM", arrival: "4:00 PM", price: "$349" },
+          { id: 3, airline: "JetStream", departure: "6:00 PM", arrival: "8:00 PM", price: "$279" },
+        ];
+        setFlights(mockFlights);
+        setIsLoading(false);
+        toast({
+          title: "Search completed",
+          description: `Found ${mockFlights.length} flights to ${destination} on ${departureDate}`,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }, 2000);
     } else {
       toast({
         title: "Error",
@@ -26,6 +39,15 @@ const Index = () => {
       });
     }
   };
+
+  const FlightCard = ({ flight }) => (
+    <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
+      <Heading size="md">{flight.airline}</Heading>
+      <Text>Departure: {flight.departure}</Text>
+      <Text>Arrival: {flight.arrival}</Text>
+      <Text fontWeight="bold">Price: {flight.price}</Text>
+    </Box>
+  );
 
   return (
     <Box bgGradient="linear(to-r, blue.400, purple.500)" minHeight="100vh" py={10}>
@@ -73,6 +95,21 @@ const Index = () => {
               </Flex>
             </VStack>
           </Box>
+
+          {isLoading ? (
+            <Flex justify="center" mt={8}>
+              <Spinner size="xl" />
+            </Flex>
+          ) : flights.length > 0 ? (
+            <Box mt={8}>
+              <Heading size="md" mb={4}>Flight Search Results</Heading>
+              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                {flights.map((flight) => (
+                  <FlightCard key={flight.id} flight={flight} />
+                ))}
+              </SimpleGrid>
+            </Box>
+          ) : null}
           
           <Box bg="white" borderRadius="xl" p={8} shadow="2xl">
             <Heading size="md" mb={4} color="gray.700">Popular Destinations</Heading>
