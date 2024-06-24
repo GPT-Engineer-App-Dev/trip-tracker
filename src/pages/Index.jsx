@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Container, Flex, Heading, Input, Text, VStack, Image, useToast, Spinner, SimpleGrid } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, Heading, Input, Text, VStack, Image, useToast, Spinner, SimpleGrid, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton } from "@chakra-ui/react";
 import { FaPlane, FaCalendarAlt, FaSearch } from "react-icons/fa";
 
 const Index = () => {
@@ -7,6 +7,8 @@ const Index = () => {
   const [departureDate, setDepartureDate] = useState("");
   const [flights, setFlights] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const toast = useToast();
 
   const handleSearch = () => {
@@ -40,12 +42,33 @@ const Index = () => {
     }
   };
 
+  const handleBookingConfirmation = () => {
+    toast({
+      title: "Booking Confirmed",
+      description: `Your flight to ${destination} with ${selectedFlight.airline} has been booked.`,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+    setIsModalOpen(false);
+  };
+
   const FlightCard = ({ flight }) => (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
       <Heading size="md">{flight.airline}</Heading>
       <Text>Departure: {flight.departure}</Text>
       <Text>Arrival: {flight.arrival}</Text>
       <Text fontWeight="bold">Price: {flight.price}</Text>
+      <Button 
+        mt={2} 
+        colorScheme="green" 
+        onClick={() => {
+          setSelectedFlight(flight);
+          setIsModalOpen(true);
+        }}
+      >
+        Book Now
+      </Button>
     </Box>
   );
 
@@ -132,6 +155,29 @@ const Index = () => {
             </Flex>
           </Box>
         </VStack>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Confirm Booking</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedFlight && (
+                <>
+                  <Text>Airline: {selectedFlight.airline}</Text>
+                  <Text>Departure: {selectedFlight.departure}</Text>
+                  <Text>Arrival: {selectedFlight.arrival}</Text>
+                  <Text>Price: {selectedFlight.price}</Text>
+                </>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="blue" mr={3} onClick={handleBookingConfirmation}>
+                Confirm Booking
+              </Button>
+              <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Container>
     </Box>
   );
